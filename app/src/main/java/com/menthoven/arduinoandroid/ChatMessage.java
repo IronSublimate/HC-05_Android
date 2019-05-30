@@ -18,7 +18,9 @@ public class ChatMessage {
         this.message = message;
         this.device = device;
     }
-
+    public  ChatMessage(String device){
+        this.device=device;
+    }
     public String getTime() {
         return sdf.format(this.time);
     }
@@ -41,5 +43,17 @@ public class ChatMessage {
 
     public void setDevice(String device) {
         this.device = device;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof ChatMessage) {
+            ChatMessage p = (ChatMessage) obj;
+            return this.device.equals(p.device);
+        }else if(obj instanceof String){
+            return this.device.equals(obj);
+        }else {
+            return false;
+        }
     }
 }

@@ -28,6 +28,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.lang.ref.WeakReference;
+import java.util.HashMap;
+import java.util.Map;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -82,7 +84,7 @@ public class BluetoothActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
-        editText.setError("Enter text first");
+        //editText.setError("Enter text first");
 
         editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -223,12 +225,23 @@ public class BluetoothActivity extends AppCompatActivity {
                     break;
                 case Constants.MESSAGE_READ:
 
-                    String readMessage = (String) msg.obj;
-
-                    if (readMessage != null && activity.showMessagesIsChecked) {
-                        ChatMessage messageRead = new ChatMessage(activity.device.getName(), readMessage.trim());
-                        activity.addMessageToAdapter(messageRead);
-
+//                    String readMessage = (String) msg.obj;
+//                    if (readMessage != null && activity.showMessagesIsChecked) {
+//                        ChatMessage messageRead = new ChatMessage(activity.device.getName(), readMessage.trim());
+//                        activity.addMessageToAdapter(messageRead);
+//                    }
+                    Map<String,String> watch_paras = (Map<String,String>) msg.obj;
+                    if (watch_paras != null && activity.showMessagesIsChecked) {
+                        for(Map.Entry<String,String> entry:watch_paras.entrySet()){
+                            int pos = activity.chatAdapter.getPosition(new ChatMessage(entry.getKey()));
+                            if(pos>=0){
+                                activity.chatAdapter.getItem(pos).setMessage(entry.getValue());
+                            }else {
+                                ChatMessage cm=new ChatMessage(entry.getKey(),entry.getValue());
+                                activity.chatAdapter.add(cm);
+                            }
+                        }
+                        activity.chatAdapter.notifyDataSetChanged();
                     }
                     break;
 

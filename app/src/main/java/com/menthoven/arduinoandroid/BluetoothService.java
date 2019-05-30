@@ -7,9 +7,14 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.UUID;
 
 /**
@@ -192,7 +197,8 @@ public class BluetoothService {
         private final BluetoothSocket mmSocket;
         private final InputStream mmInStream;
         private final OutputStream mmOutStream;
-
+        private ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        private Map<String, String> watch_paras=new TreeMap<>();
         public ConnectedThread(BluetoothSocket socket) {
             mmSocket = socket;
             InputStream tmpIn = null;
@@ -219,26 +225,30 @@ public class BluetoothService {
             StringBuilder readMessage = new StringBuilder();
 
             // Keep listening to the InputStream until an exception occurs
-            while (true) {
+            while (true)
                 try {
 
                     bytes = mmInStream.read(buffer);
-                    String read = new String(buffer, 0, bytes);
-                    readMessage.append(read);
+                    this.bytes2map(buffer,bytes);
+                    //String read = new String(buffer, 0, bytes);
+                    //readMessage.append(read);
 
-                    if (read.contains("\n")) {
+//                    if (read.contains("\n")) {
+//
+                    //myHandler.obtainMessage(Constants.MESSAGE_READ, bytes, -1, readMessage.toString()).sendToTarget();
+                    myHandler.obtainMessage(Constants.MESSAGE_READ, bytes, -1, this.watch_paras).sendToTarget();
 
-                        myHandler.obtainMessage(Constants.MESSAGE_READ, bytes, -1, readMessage.toString()).sendToTarget();
-                        readMessage.setLength(0);
-                    }
+//                    readMessage.setLength(0);
+////                    }
+//                    while (true) {
+//                        int index = readMessage.indexOf("0");
+//                    }
 
                 } catch (IOException e) {
-
                     Log.e(Constants.TAG, "Connection Lost", e);
                     connectionLost();
                     break;
                 }
-            }
         }
 
         /* Call this from the main activity to send data to the remote device */
@@ -259,6 +269,35 @@ public class BluetoothService {
             } catch (IOException e) {
                 Log.e(Constants.TAG, "close() of connect socket failed", e);}
         }
+        public void bytes2map(byte[] read_buffer,int length) {
+            byteArrayOutputStream.write(read_buffer,0,length);
+            while (true) {
+                byte[] array=byteArrayOutputStream.toByteArray();
+                int index = -1;
+                for (int i = 0; i < array.length; ++i) {
+                    if (array[i] == (byte) 0) {
+                        index = i;
+                        break;
+                    }
+                }
+                if (index < 0) {
+                    break;
+                }
+                byteArrayOutputStream.reset();
+                byteArrayOutputStream.write(array, index + 1, array.length-index-1);
+                byte msg = array[0];
+                if (msg == (byte) 0xa0 || msg == (byte) 0xa8) {
+                    String[] list_of_msg = new String(array, 1, index).split("\n");
+                    for (int i = 0; i < list_of_msg.length; ++i) {
+                        if (!list_of_msg[i].isEmpty()) {
+                            String[] kv = list_of_msg[i].split("\\:", 2);
+                            if (kv.length > 1) {
+                                this.watch_paras.put(kv[0], kv[1]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
-
 }
