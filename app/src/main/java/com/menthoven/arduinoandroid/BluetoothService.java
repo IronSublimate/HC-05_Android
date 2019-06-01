@@ -225,11 +225,11 @@ public class BluetoothService {
             StringBuilder readMessage = new StringBuilder();
 
             // Keep listening to the InputStream until an exception occurs
-            while (true)
+            while (true) {
                 try {
 
                     bytes = mmInStream.read(buffer);
-                    this.bytes2map(buffer,bytes);
+                    this.bytes2map(buffer, bytes);
                     //String read = new String(buffer, 0, bytes);
                     //readMessage.append(read);
 
@@ -249,6 +249,7 @@ public class BluetoothService {
                     connectionLost();
                     break;
                 }
+            }
         }
 
         /* Call this from the main activity to send data to the remote device */

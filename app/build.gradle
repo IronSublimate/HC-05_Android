@@ -2,8 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.2"
-
+    //buildToolsVersion "23.0.2"
     defaultConfig {
         applicationId "com.menthoven.arduinoandroid"
         minSdkVersion 15
@@ -24,12 +23,14 @@ android {
         // but continue the build even when errors are found:
         abortOnError false
     }
+    buildToolsVersion '28.0.3'
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:23.1.1'
-    compile 'com.jakewharton:butterknife:7.0.0'
-    compile 'com.android.support:design:23.1.1'
-    compile 'com.jakewharton:butterknife:7.0.0'
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.android.support:appcompat-v7:23.1.1'
+    implementation 'com.jakewharton:butterknife:7.0.0'
+    implementation 'com.android.support:design:23.1.1'
+    implementation 'com.jakewharton:butterknife:7.0.0'
+    testImplementation 'junit:junit:4.12'
 }
