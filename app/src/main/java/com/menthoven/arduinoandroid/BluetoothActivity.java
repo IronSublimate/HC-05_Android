@@ -15,26 +15,21 @@ import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.WindowManager;
+import android.view.*;
 import android.view.inputmethod.EditorInfo;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ListView;
-import android.widget.ProgressBar;
-import android.widget.TextView;
+import android.widget.*;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Array;
 import java.util.HashMap;
 import java.util.Map;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-
+import butterknife.OnTouch;
 public class BluetoothActivity extends AppCompatActivity {
 
 
@@ -49,12 +44,31 @@ public class BluetoothActivity extends AppCompatActivity {
     ListView chatListView;
     @Bind(R.id.toolbar)
     Toolbar toolbar;
-    @Bind(R.id.empty_list_item)
+    //@Bind(R.id.empty_list_item)
     TextView emptyListTextView;
     @Bind(R.id.toolbar_progress_bar)
     ProgressBar toolbalProgressBar;
     @Bind(R.id.coordinator_layout_bluetooth)
     CoordinatorLayout coordinatorLayout;
+
+    @Bind(R.id.button_anti_clock)
+    Button button_anti_clock;
+    @Bind(R.id.button_back)
+    Button button_back;
+    @Bind(R.id.button_clock)
+    Button button_clock;
+    @Bind(R.id.button_left)
+    Button button_left;
+    @Bind(R.id.button_right)
+    Button button_right;
+    @Bind(R.id.button_stop)
+    Button button_stop;
+    @Bind(R.id.button_up)
+    Button button_up;
+    @Bind(R.id.seekBar_velocity)
+    SeekBar seekBar_velocity;
+    @Bind(R.id.switch_manual)
+    Switch switch_manual;
 
     MenuItem reconnectButton;
     ChatAdapter chatAdapter;
@@ -64,6 +78,45 @@ public class BluetoothActivity extends AppCompatActivity {
     private boolean showMessagesIsChecked = true;
     private boolean autoScrollIsChecked = true;
     public static boolean showTimeIsChecked = true;
+
+    private void onButtonTouched(int action,int deriction){
+        if(action == MotionEvent.ACTION_DOWN) {
+            int speed = seekBar_velocity.getProgress() * 100;
+            this.sendControlMessage(deriction, speed);
+        }
+        else if(action == MotionEvent.ACTION_UP){
+            this.sendControlMessage(Constants.STOP_CAR, 0);
+        }
+    }
+    @OnTouch(R.id.button_anti_clock) boolean touch_button_anti_clock(View v, MotionEvent event){
+        onButtonTouched(event.getAction(),Constants.TURN_LEFT);
+        return false;
+    }
+    @OnTouch(R.id.button_back) boolean touch_button_button_back(View v, MotionEvent event){
+        onButtonTouched(event.getAction(),Constants.GO_BACKWARD);
+        return false;
+    }
+    @OnTouch(R.id.button_clock) boolean touch_button_button_clock(View v, MotionEvent event){
+        onButtonTouched(event.getAction(),Constants.TURN_RIGHT);
+        return false;
+    }
+    @OnTouch(R.id.button_left) boolean touch_button_button_left(View v, MotionEvent event){
+        onButtonTouched(event.getAction(),Constants.MOVE_LEFT);
+        return false;
+    }
+    @OnTouch(R.id.button_right) boolean touch_button_button_right(View v, MotionEvent event){
+        onButtonTouched(event.getAction(),Constants.MOVE_RIGHT);
+        return false;
+    }
+    @OnTouch(R.id.button_stop) boolean touch_button_button_stop(View v, MotionEvent event){
+        onButtonTouched(event.getAction(),Constants.STOP_CAR);
+        return false;
+    }
+    @OnTouch(R.id.button_up) boolean touch_button_button_up(View v, MotionEvent event){
+        onButtonTouched(event.getAction(),Constants.GO_FORWARD);
+        return false;
+    }
+
 
     @OnClick(R.id.send_button) void send() {
         // Send a item_message using content of the edit text widget
@@ -76,6 +129,16 @@ public class BluetoothActivity extends AppCompatActivity {
         }
     }
 
+    private void setControlEnable(boolean enable){
+        seekBar_velocity.setEnabled(enable);
+        button_anti_clock.setEnabled(enable);
+        button_back.setEnabled(enable);
+        button_clock.setEnabled(enable);
+        button_left.setEnabled(enable);
+        button_right.setEnabled(enable);
+        button_stop.setEnabled(enable);
+        button_up.setEnabled(enable);
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -104,7 +167,17 @@ public class BluetoothActivity extends AppCompatActivity {
                 });
 
 
-
+        switch_manual.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                setControlEnable(isChecked);
+                if(isChecked){
+                    ;
+                } else {
+                    sendControlMessage(Constants.STOP_CAR,0);
+                }
+            }
+        });
         chatAdapter = new ChatAdapter(this);
         chatListView.setEmptyView(emptyListTextView);
         chatListView.setAdapter(chatAdapter);
@@ -124,6 +197,9 @@ public class BluetoothActivity extends AppCompatActivity {
         bluetoothService = new BluetoothService(handler, device);
 
         setTitle(device.getName());
+        setControlEnable(false);
+        seekBar_velocity.setProgress(70);
+
     }
 
     @Override protected void onStart() {
@@ -179,7 +255,33 @@ public class BluetoothActivity extends AppCompatActivity {
             bluetoothService.write(send);
         }
     }
+    //private byte[] send_msg=new byte[64];
 
+    private void sendControlMessage(int direction,int speed){
+        if (bluetoothService.getState() != Constants.STATE_CONNECTED) {
+            Snackbar.make(coordinatorLayout, "You are not connected", Snackbar.LENGTH_LONG)
+                    .setAction("Connect", new View.OnClickListener() {
+                        @Override public void onClick(View v) {
+                            reconnect();
+                        }
+                    }).show();
+            return;
+        } else {
+            ByteArrayOutputStream byte_buffer=new ByteArrayOutputStream();
+            try {
+                byte_buffer.write((byte) 0xc1);
+                byte_buffer.write(Integer.toString(direction).getBytes());
+                byte_buffer.write((byte) 32);//' '
+                byte_buffer.write(Integer.toString(speed).getBytes());
+                byte_buffer.write((byte) 0);
+            }catch(IOException e){
+                e.printStackTrace();
+            }
+            System.out.println(byte_buffer);
+            bluetoothService.write(byte_buffer.toByteArray());
+            return;
+        }
+    }
 
     private static class myHandler extends Handler {
         private final WeakReference<BluetoothActivity> mActivity;

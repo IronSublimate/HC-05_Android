@@ -28,6 +28,14 @@ public interface Constants {
     // Key names received from the BluetoothChatService Handler
     String EXTRA_DEVICE  = "EXTRA_DEVICE";
     String SNACKBAR = "toast";
-
+//0停车，2后退，4左行，6右行，8前行，7顺时针转，9逆时针转，1切回找灯模式
+    int STOP_CAR=0;
+    int GO_BACKWARD=2;
+    int MOVE_LEFT=4;
+    int MOVE_RIGHT=6;
+    int GO_FORWARD=8;
+    int TURN_RIGHT=7;
+    int TURN_LEFT=9;
+    int TURN_ROUND=1;
 
 }
