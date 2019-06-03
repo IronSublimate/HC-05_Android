@@ -69,8 +69,8 @@
         <Button
                 android:text="顺时针"
                 android:layout_height="48dp" android:id="@+id/button_clock"
-                android:layout_width="wrap_content" app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"/>
+                android:layout_width="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="parent"/>
         <Button
                 android:text="向后"
                 android:layout_width="wrap_content"
@@ -85,27 +85,24 @@
                 android:layout_height="48dp" app:layout_row="0" app:layout_column="1"
                 android:id="@+id/button_stop"
                 android:layout_width="88dp"
-                app:layout_constraintTop_toTopOf="parent" app:layout_constraintEnd_toEndOf="@+id/button_anti_clock"
+                tools:layout_editor_absoluteY="0dp" app:layout_constraintEnd_toEndOf="parent"
                 android:layout_marginEnd="8dp" android:layout_marginRight="8dp"
-                app:layout_constraintStart_toStartOf="@+id/button_clock" android:layout_marginLeft="8dp"
+                app:layout_constraintStart_toStartOf="parent" android:layout_marginLeft="8dp"
                 android:layout_marginStart="8dp"/>
         <Button
                 android:text="逆时针"
                 android:layout_height="wrap_content" app:layout_row="0" app:layout_column="2"
                 android:id="@+id/button_anti_clock" android:layout_width="wrap_content"
-                app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="parent"/>
+                app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent"/>
         <Button
                 android:text="前进"
                 android:layout_width="88dp"
                 android:layout_height="wrap_content" app:layout_row="1" app:layout_column="1"
                 android:id="@+id/button_up"
-                app:layout_constraintEnd_toEndOf="@+id/button_anti_clock"
-                app:layout_constraintStart_toStartOf="@+id/button_clock" android:layout_marginLeft="88dp"
-                android:layout_marginStart="88dp" android:layout_marginEnd="88dp" android:layout_marginRight="88dp"
-                android:layout_marginBottom="8dp"
-                app:layout_constraintBottom_toTopOf="@+id/button_back"
-                app:layout_constraintTop_toBottomOf="@+id/button_stop" android:layout_marginTop="16dp"
-                app:layout_constraintHorizontal_bias="0.483" app:layout_constraintVertical_bias="0.736"/>
+                app:layout_constraintBottom_toTopOf="@+id/button_back" app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginEnd="8dp" android:layout_marginRight="8dp"
+                app:layout_constraintStart_toStartOf="parent" android:layout_marginLeft="8dp"
+                android:layout_marginStart="8dp"/>
         <Button
                 android:text="向左"
                 android:layout_width="wrap_content"

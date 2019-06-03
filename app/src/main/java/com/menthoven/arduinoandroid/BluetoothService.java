@@ -182,7 +182,9 @@ public class BluetoothService {
             connected(mmSocket, mmDevice);
         }
 
-        /** Will cancel an in-progress connection, and close the socket */
+        /**
+         * Will cancel an in-progress connection, and close the socket
+         */
         public void cancel() {
             try {
                 mmSocket.close();
@@ -198,7 +200,8 @@ public class BluetoothService {
         private final InputStream mmInStream;
         private final OutputStream mmOutStream;
         private ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        private Map<String, String> watch_paras=new TreeMap<>();
+        private Map<String, String> watch_paras = new TreeMap<>();
+
         public ConnectedThread(BluetoothSocket socket) {
             mmSocket = socket;
             InputStream tmpIn = null;
@@ -256,24 +259,29 @@ public class BluetoothService {
         public void write(byte[] bytes) {
             try {
                 mmOutStream.write(bytes);
-                myHandler.obtainMessage(Constants.MESSAGE_WRITE, -1, -1, bytes).sendToTarget();
+                //myHandler.obtainMessage(Constants.MESSAGE_WRITE, -1, -1, bytes).sendToTarget();
             } catch (IOException e) {
                 Log.e(Constants.TAG, "Exception during write", e);
             }
         }
 
         /* Call this from the main activity to shutdown the connection */
-        /** Will cancel an in-progress connection, and close the socket */
+
+        /**
+         * Will cancel an in-progress connection, and close the socket
+         */
         public void cancel() {
             try {
                 mmSocket.close();
             } catch (IOException e) {
-                Log.e(Constants.TAG, "close() of connect socket failed", e);}
+                Log.e(Constants.TAG, "close() of connect socket failed", e);
+            }
         }
-        public void bytes2map(byte[] read_buffer,int length) {
-            byteArrayOutputStream.write(read_buffer,0,length);
+
+        public void bytes2map(byte[] read_buffer, int length) {
+            byteArrayOutputStream.write(read_buffer, 0, length);
             while (true) {
-                byte[] array=byteArrayOutputStream.toByteArray();
+                byte[] array = byteArrayOutputStream.toByteArray();
                 int index = -1;
                 for (int i = 0; i < array.length; ++i) {
                     if (array[i] == (byte) 0) {
@@ -285,15 +293,17 @@ public class BluetoothService {
                     break;
                 }
                 byteArrayOutputStream.reset();
-                byteArrayOutputStream.write(array, index + 1, array.length-index-1);
+                byteArrayOutputStream.write(array, index + 1, array.length - index - 1);
                 byte msg = array[0];
                 if (msg == (byte) 0xa0 || msg == (byte) 0xa8) {
                     String[] list_of_msg = new String(array, 1, index).split("\n");
-                    for (int i = 0; i < list_of_msg.length; ++i) {
-                        if (!list_of_msg[i].isEmpty()) {
-                            String[] kv = list_of_msg[i].split("\\:", 2);
-                            if (kv.length > 1) {
-                                this.watch_paras.put(kv[0], kv[1]);
+                    synchronized (this.watch_paras) {
+                        for (int i = 0; i < list_of_msg.length; ++i) {
+                            if (!list_of_msg[i].isEmpty()) {
+                                String[] kv = list_of_msg[i].split("\\:", 2);
+                                if (kv.length > 1) {
+                                    this.watch_paras.put(kv[0], kv[1]);
+                                }
                             }
                         }
                     }
