@@ -32,6 +32,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnTouch;
 
+import com.menthoven.arduinoandroid.Rudder;
 public class BluetoothActivity extends AppCompatActivity {
 
 
@@ -71,6 +72,10 @@ public class BluetoothActivity extends AppCompatActivity {
     SeekBar seekBar_velocity;
     @Bind(R.id.switch_manual)
     Switch switch_manual;
+
+
+    @Bind(R.id.rudder)
+    Rudder rudder;
 
     MenuItem reconnectButton;
     ChatAdapter chatAdapter;
@@ -154,6 +159,7 @@ public class BluetoothActivity extends AppCompatActivity {
         button_right.setEnabled(enable);
         button_stop.setEnabled(enable);
         button_up.setEnabled(enable);
+        rudder.setEnabled(enable);
     }
 
     @Override
@@ -219,6 +225,19 @@ public class BluetoothActivity extends AppCompatActivity {
         setControlEnable(false);
         seekBar_velocity.setProgress(60);
 
+        rudder.setRudderListener(new Rudder.RudderListener() {
+            @Override
+            public void onSteeringWheelChanged(int action,float x,float y){
+                if(action == Rudder.ACTION_RUDDER) {
+                    //TODO:事件实现
+                    //System.out.println(x);
+                    //System.out.println(y);
+                    int speed = seekBar_velocity.getProgress() * 100;
+                    sendVectorControlMessage(x,y,speed);
+                }
+            }
+        });
+
     }
 
     @Override
@@ -239,7 +258,6 @@ public class BluetoothActivity extends AppCompatActivity {
             bluetoothService.stop();
             Log.d(Constants.TAG, "Stopping");
         }
-
         unregisterReceiver(mReceiver);
     }
 
@@ -260,7 +278,6 @@ public class BluetoothActivity extends AppCompatActivity {
                         }).show();
             }
         }
-
     }
 
 
@@ -308,7 +325,34 @@ public class BluetoothActivity extends AppCompatActivity {
             return;
         }
     }
-
+    private void sendVectorControlMessage(float x,float y, int speed) {
+        if (bluetoothService.getState() != Constants.STATE_CONNECTED) {
+            Snackbar.make(coordinatorLayout, "You are not connected", Snackbar.LENGTH_LONG)
+                    .setAction("Connect", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            reconnect();
+                        }
+                    }).show();
+            return;
+        } else {
+            ByteArrayOutputStream byte_buffer = new ByteArrayOutputStream();
+            try {
+                byte_buffer.write((byte) 0xc3);
+                byte_buffer.write(Float.toString(x).getBytes());
+                byte_buffer.write((byte) 32);//' '
+                byte_buffer.write(Float.toString(y).getBytes());
+                byte_buffer.write((byte) 32);//' '
+                byte_buffer.write(Integer.toString(speed).getBytes());
+                byte_buffer.write((byte) 0);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            //System.out.println(byte_buffer);
+            bluetoothService.write(byte_buffer.toByteArray());
+            return;
+        }
+    }
     private static class myHandler extends Handler {
         private final WeakReference<BluetoothActivity> mActivity;
 
@@ -393,8 +437,6 @@ public class BluetoothActivity extends AppCompatActivity {
                     break;
             }
         }
-
-
     }
 
     private void addMessageToAdapter(ChatMessage chatMessage) {

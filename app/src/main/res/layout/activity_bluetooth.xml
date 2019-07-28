@@ -30,6 +30,8 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_bluetooth"/>
+    <include layout="@layout/content_bluetooth" android:id="@+id/include_message"/>
+    <include android:layout_width="match_parent" android:layout_height="match_parent" layout="@layout/content_control"
+             android:id="@+id/include_control"/>
 
 </android.support.design.widget.CoordinatorLayout>
