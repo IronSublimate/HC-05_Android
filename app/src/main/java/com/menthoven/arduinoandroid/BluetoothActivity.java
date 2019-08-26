@@ -84,7 +84,7 @@ public class BluetoothActivity extends AppCompatActivity {
 
     private boolean showMessagesIsChecked = true;
     private boolean autoScrollIsChecked = true;
-    public static boolean showTimeIsChecked = true;
+    public static boolean showTimeIsChecked = false;
 
     private void onButtonTouched(int action, int deriction) {
         if (action == MotionEvent.ACTION_DOWN) {

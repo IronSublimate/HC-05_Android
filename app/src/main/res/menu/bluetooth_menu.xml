@@ -29,9 +29,8 @@
         android:title="Show messages"/>
 
     <item
-        android:id="@+id/checkable_show_time"
-        android:checkable="true"
-        android:checked="true"
-        android:title="Show time"/>
+            android:id="@+id/checkable_show_time"
+            android:checked="false"
+            android:title="Show time" android:checkable="true"/>
 
 </menu>

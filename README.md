@@ -1,4 +1,25 @@
-# Android-HC05-App
-Source code for "HC-05 Bluetooth Terminal" Android app
+# Android-HC05-Controller
 
-Feel free to use this code in your own app
+
+--- 
+>作者：侯宇轩  
+> 本代码修改自MEnthoven的Android-HC05-App
+> [参考代码](https://github.com/MEnthoven/Android-HC05-App)  
+---
+
+Android手机与HC-05、HC-06通信的app
+
+## 数据传输格式
+#### 调参模式
+
+传送的格式统一为字符串，上位机向下位机发送以奇数开始，下位机向上位机发送以偶数开始；以'\\0'结束
+
+- 参数模式
+    - 下位机向上位机发送以0xa0开始，格式为"\\xa0\[参数名\]\:\[参数值\]\\n\[参数位置\]:\[参数值(整数)\]\\n...\\0"
+
+#### 手动控制模式
+- 蓝牙控制模式
+    - 上位机向下位机发送以0xc1开始,格式为"\\xc1\[控制码\]\t\[速度\]
+    - 控制码对应：0停车，2后退，4左行，6右行，8前行，7顺时针转，9逆时针转，1切回找灯模式
+- 蓝牙矢量控制模式
+    - 上位机向下位机发送以0xc3开始,格式为"\\xc3\[x方向向量(-1.0f~+1.0f)\]\t\[y方向向量(-1.0f~+1.0f)\]\t\[速度\]

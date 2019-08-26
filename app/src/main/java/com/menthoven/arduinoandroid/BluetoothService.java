@@ -239,7 +239,10 @@ public class BluetoothService {
 //                    if (read.contains("\n")) {
 //
                     //myHandler.obtainMessage(Constants.MESSAGE_READ, bytes, -1, readMessage.toString()).sendToTarget();
-                    myHandler.obtainMessage(Constants.MESSAGE_READ, bytes, -1, this.watch_paras).sendToTarget();
+                    if (this.watch_paras != null) {
+                        myHandler.obtainMessage(Constants.MESSAGE_READ, bytes, -1, this.watch_paras).sendToTarget();
+                        this.watch_paras = null;
+                    }
 
 //                    readMessage.setLength(0);
 ////                    }
@@ -296,13 +299,14 @@ public class BluetoothService {
                 byteArrayOutputStream.write(array, index + 1, array.length - index - 1);
                 byte msg = array[0];
                 if (msg == (byte) 0xa0 || msg == (byte) 0xa8) {
+                    this.watch_paras = new TreeMap<>();
                     String[] list_of_msg = new String(array, 1, index).split("\n");
-                    synchronized (this.watch_paras) {
+                    synchronized (watch_paras) {
                         for (int i = 0; i < list_of_msg.length; ++i) {
                             if (!list_of_msg[i].isEmpty()) {
                                 String[] kv = list_of_msg[i].split("\\:", 2);
                                 if (kv.length > 1) {
-                                    this.watch_paras.put(kv[0], kv[1]);
+                                    watch_paras.put(kv[0], kv[1]);
                                 }
                             }
                         }
